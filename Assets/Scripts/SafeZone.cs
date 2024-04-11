@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 [RequireComponent(typeof(BoxCollider))]
 public class SafeZone : MonoBehaviour
@@ -6,41 +7,41 @@ public class SafeZone : MonoBehaviour
     [SerializeField] private AudioSource _audioSource;
     [SerializeField] private float _volumeChanging = 0.1f;
 
-    private bool _isPlaying = false;
-    private float _startVolume = 0;
-    private float _endVolume = 1;
-
-    private void Update()
-    {
-        ChangeVolume();
-    }
+    private float _minVolume = 0;
+    private float _maxVolume = 1;
 
     private void Start()
     {
-        _audioSource.volume = _startVolume;
+        _audioSource.volume = _minVolume;
     }
 
-    private void ChangeVolume()
-    {
-        if (_isPlaying)
-            _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, _endVolume, _volumeChanging * Time.deltaTime);
-
-        if (_audioSource.volume == 0)
-        {
-            _isPlaying = false;
-            _audioSource.Pause();
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
+    private void FadeIn()
     {
         _audioSource.Play();
-        _endVolume = 1;
-        _isPlaying = true;
+        StopAllCoroutines();
+        StartCoroutine(ChangeVolume(_audioSource.volume, _maxVolume));
     }
 
-    private void OnTriggerExit(Collider other)
+    private void FadeOut()
     {
-        _endVolume = 0;
+        StopAllCoroutines();
+        StartCoroutine(ChangeVolume(_audioSource.volume, _minVolume));
     }
+
+    private IEnumerator ChangeVolume(float currentVolume, float endVolume)
+    {
+        while(currentVolume != endVolume)
+        {
+            _audioSource.volume = Mathf.MoveTowards(currentVolume, endVolume, _volumeChanging * Time.deltaTime);
+            currentVolume = _audioSource.volume;
+            yield return null;
+        }
+
+        if (_audioSource.volume == 0)
+            _audioSource.Pause();
+    }
+
+    private void OnTriggerEnter(Collider other) => FadeIn();
+
+    private void OnTriggerExit(Collider other) => FadeOut();
 }

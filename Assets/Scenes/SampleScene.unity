@@ -631,7 +631,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _audioSource: {fileID: 1083380545}
-  _volumeChanging: 0.1
+  _volumeChanging: 0.3
 --- !u!1 &1794743415
 GameObject:
   m_ObjectHideFlags: 0
