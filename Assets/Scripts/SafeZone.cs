@@ -9,6 +9,7 @@ public class SafeZone : MonoBehaviour
 
     private float _minVolume = 0;
     private float _maxVolume = 1;
+    private Coroutine _changeVolume;
 
     private void Start()
     {
@@ -17,20 +18,26 @@ public class SafeZone : MonoBehaviour
 
     private void FadeIn()
     {
+        StopPlaying();
         _audioSource.Play();
-        StopAllCoroutines();
-        StartCoroutine(ChangeVolume(_audioSource.volume, _maxVolume));
+        _changeVolume = StartCoroutine(ChangeVolume(_audioSource.volume, _maxVolume));
     }
 
     private void FadeOut()
     {
-        StopAllCoroutines();
+        StopPlaying();
         StartCoroutine(ChangeVolume(_audioSource.volume, _minVolume));
+    }
+
+    private void StopPlaying()
+    {
+        if (_changeVolume != null)
+            StopCoroutine(_changeVolume);
     }
 
     private IEnumerator ChangeVolume(float currentVolume, float endVolume)
     {
-        while(currentVolume != endVolume)
+        while (currentVolume != endVolume)
         {
             _audioSource.volume = Mathf.MoveTowards(currentVolume, endVolume, _volumeChanging * Time.deltaTime);
             currentVolume = _audioSource.volume;
